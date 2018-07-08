@@ -1,0 +1,14 @@
+#cloud-config
+
+users:
+  - name: ubuntu
+    groups: sudo
+    ssh-authorized-keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDCNUuzeHXxxOmaLl8WJEMiDse1ZneyjdpFx9BT5SVX9qEwlLs5xRqT/QFpg7bXl1SfUpvyn008X28IAH/hyKGss3WQNBEViVoKWZxdOMtUYFNW9O4t7tFD3pirssI9lBJhslvylW1dSPwPCeX/J55HhjwzrK6akHvYMc1m0cLVLQFm7x89/+daZ0Tj33meoD7AxyX3626fLX7aGpZw3nQB9gDv47o5ShAuNj8J4JAGoDL9IGjtXzk1zMe8/BEn61utj59qsZ8mL+nJMCsHe/N2zwmnofTi93MeA0MyUd9PdZtAXqjMpS6rwFu3Md9+JtomIepoAxlirSYXWJxyA0QP hakase@hakase
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    shell: /bin/dash
+
+chpasswd:
+  list: |
+    ubuntu:password
+  expire: False

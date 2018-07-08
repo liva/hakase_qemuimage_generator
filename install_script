@@ -1,0 +1,60 @@
+set -xe
+
+sudo sh -c "echo 127.0.1.1 $(hostname) >> /etc/hosts"
+
+sudo systemctl stop apt-daily.service
+sudo systemctl kill --kill-who=all apt-daily.service
+
+# wait until "apt-daily" has been killed
+while ! (sudo systemctl list-units --all apt-daily.service | fgrep -q dead)
+do
+    sleep 1;
+done
+
+# avoid duplicate installation
+test -f /etc/hakase_installed && exit
+
+sudo su -c "grep '^deb ' /etc/apt/sources.list | sed 's/^deb/deb-src/g' > /etc/apt/sources.list.d/deb-src.list"
+sudo sed -i'~' -E "s@http://(..\.)?archive\.ubuntu\.com/ubuntu@http://pf.is.s.u-tokyo.ac.jp/~awamoto/apt-mirror/@g" /etc/apt/sources.list
+
+sudo apt update -qq
+sudo apt remove -y unattended-upgrades
+
+# setup rsync
+mkdir -p ${HOME}/share
+sudo tee /etc/rsyncd.conf <<EOF >/dev/null
+uid         = root
+gid         = root
+log file    = /var/log/rsyncd.log
+pid file    = /var/run/rsyncd.pid
+
+[share]
+path = ${HOME}/share
+EOF
+
+sudo systemctl start rsync
+sudo systemctl enable rsync
+
+# install hakase kernel
+pushd /usr/src
+sudo wget http://www.pf.is.s.u-tokyo.ac.jp/~awamoto/hakase/linux-headers-4.14.34hakase_4.14.34hakase-1_amd64.deb
+sudo wget http://www.pf.is.s.u-tokyo.ac.jp/~awamoto/hakase/linux-image-4.14.34hakase_4.14.34hakase-1_amd64.deb
+sudo wget http://www.pf.is.s.u-tokyo.ac.jp/~awamoto/hakase/linux-libc-dev_4.14.34hakase-1_amd64.deb
+
+sudo dpkg -i *hakase-1_amd64.deb
+popd
+
+# setup grub
+GRUB_CONFIG="/etc/default/grub"
+if [ -e /etc/default/grub.d/50-cloudimg-settings.cfg ]; then
+    GRUB_CONFIG="/etc/default/grub.d/50-cloudimg-settings.cfg"
+fi
+
+sudo sed -i -e "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"memmap=0x80000000\\\\\\\\\\\\\$0x80000000 /g" ${GRUB_CONFIG}
+sudo sed -i -e "s/GRUB_TIMEOUT=10/GRUB_TIMEOUT=2/g" ${GRUB_CONFIG}
+sudo update-grub2
+
+sudo sed -i 's|UsePAM yes|UsePAM no|g' /etc/ssh/sshd_config
+
+sudo su -c "date > /etc/hakase_installed"
+touch ${HOME}/.hushlogin
