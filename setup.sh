@@ -46,8 +46,7 @@ echo "quit" | netcat localhost 4445
 rm ubuntu-16.04-server-cloudimg-amd64-disk1.img
 trap SIGINT ERR
 
-FINAL=hakase_qemuimage_$(openssl rand -base64 24).tar.xz
-tar Jcvf ${FINAL} .
-mv ${FINAL} ..
+FINAL=
+tar jcvf ../hakase_qemuimage_$(openssl rand -base64 24).tar.bz2 .
 
 echo "setup done!"
