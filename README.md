@@ -11,6 +11,6 @@ Should be run on a fast CPU. (i.e. Intel Xeon Processor)
 
 ## Requirements
 * wget
-* qemu (> 2.9.0)
+* qemu (https://github.com/liva/hakase_qemu_deb)
 * cloud-utils
 * expect
