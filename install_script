@@ -23,10 +23,11 @@ sudo apt remove -y unattended-upgrades
 # setup rsync
 mkdir -p ${HOME}/share
 sudo tee /etc/rsyncd.conf <<EOF >/dev/null
-uid         = root
-gid         = root
+uid         = ubuntu
+gid         = ubuntu
 log file    = /var/log/rsyncd.log
 pid file    = /var/run/rsyncd.pid
+read only   = no
 
 [share]
 path = ${HOME}/share
