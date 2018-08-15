@@ -37,13 +37,17 @@ sudo systemctl start rsync
 sudo systemctl enable rsync
 
 # install hakase kernel
-pushd /usr/src
-sudo wget http://www.pf.is.s.u-tokyo.ac.jp/~awamoto/hakase/linux-headers-4.14.34hakase_4.14.34hakase-1_amd64.deb
+pushd /tmp
 sudo wget http://www.pf.is.s.u-tokyo.ac.jp/~awamoto/hakase/linux-image-4.14.34hakase_4.14.34hakase-1_amd64.deb
 sudo wget http://www.pf.is.s.u-tokyo.ac.jp/~awamoto/hakase/linux-libc-dev_4.14.34hakase-1_amd64.deb
 
 sudo dpkg -i *hakase-1_amd64.deb
 popd
+
+# remove old kernel headers
+sudo rm -rf /usr/src/linux-headers-4.4.0-128
+sudo rm -rf /usr/src/linux-headers-4.4.0-128-generic
+sudo rm -rf /lib/modules/4.4.0-128-generic
 
 # setup grub
 GRUB_CONFIG="/etc/default/grub"
@@ -59,3 +63,7 @@ sudo sed -i 's|UsePAM yes|UsePAM no|g' /etc/ssh/sshd_config
 
 sudo su -c "date > /etc/hakase_installed"
 touch ${HOME}/.hushlogin
+
+# clean
+sudo dd if=/dev/zero of=/EMPTY bs=1M || :
+sudo rm -f /EMPTY
